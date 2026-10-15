@@ -36,9 +36,11 @@ def check_linux_install(root):
     assert b'[:1000]' not in installed.read_bytes()
     assert b'from chatlocal.linux_readers import install_qq' in installed.read_bytes()
     assert not (root/'tools/qq-reader/README.md').exists()
+    # Windows temporary roots can use aliases/junctions; compare canonical paths.
+    expected_root=(root/'tools/qq-reader').resolve()
     for row in receipt:
         target=(root/row['file']).resolve()
-        assert target.is_relative_to(root/'tools/qq-reader')
+        assert target.is_relative_to(expected_root)
         assert hashlib.sha256(target.read_bytes()).hexdigest()==row['installed_sha256']
     unsafe=linux_archive({'chatlog_keeper/../../escape.py':b'unsafe'})
     for data,digest in ((archive,'0'*64),(unsafe,hashlib.sha256(unsafe).hexdigest())):
@@ -67,6 +69,12 @@ def main():
             expected=(root/'tools/wechat-reader/wechatauto/db.py').resolve()
             assert installer.install_target('wechat-reader','wechatauto/db.py')==expected
         check_linux_install(root)
+        if sys.platform!='win32':
+            # Reproduce an aliased temporary root on POSIX without requiring
+            # Windows symlink privileges. Both runs retain the escape checks.
+            actual=Path(tmp)/'actual';actual.mkdir();(actual/'nested').mkdir()
+            alias=Path(tmp)/'alias';alias.symlink_to(actual,target_is_directory=True)
+            check_linux_install(alias)
     print('PASS isolated checkout and Linux archive install, digest, canonical root and path containment; no network')
 
 
