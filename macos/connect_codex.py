@@ -23,14 +23,12 @@ async def main():
         result = await test_connection(existing['url'], token)
         print(json.dumps(dict(configured=True, changed=False, **result)))
         return
-    desktop = json.loads((ROOT/'.tmp/macos-service.json').read_text())['url']
-    async with httpx.AsyncClient(base_url=desktop, trust_env=False, timeout=30,
-                                headers={'X-ChatWeave-UI': '1'}) as http:
-        status = (await http.get('/api/mcp')).json()
-        port = status['port']
-        response = await http.put('/api/mcp', json=dict(enabled=True, port=port))
-        response.raise_for_status()
-        url = response.json()['url']
+    from chatlocal.terminal_client import TerminalClient
+    from chatlocal.terminal_launcher import ensure_backend
+    ensure_backend(root=ROOT, timeout=90)
+    client = TerminalClient()
+    status = client.api_get('/api/mcp')
+    url = client.api_put('/api/mcp', dict(enabled=True, port=status['port']))['url']
     grant = access.create(dict(name='Codex · 全部聊天资料（只读）', platforms=['qq', 'wechat'],
                              all_conversations=True, allow_future_imports=True,
                              media=True, prepare=True, voice=False))

@@ -1,5 +1,5 @@
+# Cocoa window and TUI share the same complete backend.
 -r readers.txt
+-r mcp.txt
+-r tui.txt
 pywebview==6.2.1
-imageio-ffmpeg==0.6.0
-pypdf==6.19.0
-opencc-python-reimplemented==0.1.7

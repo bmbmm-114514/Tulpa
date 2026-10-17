@@ -26,7 +26,7 @@ Tulpa 在本机整理聊天、图片和文件，让 Agent 按你授权的范围�
 安装与限制见 [Linux 教程](README.linux.md)、[使用说明](doc/LINUX_TERMINAL.md)；
 开发分工见 [模型贡献记录](doc/LINUX_CONTRIBUTORS.md)。下方桌面下载和启动教程继续适用于 Windows。
 
-macOS 用户请使用 [源码预览版安装说明](macos/README.md)。
+macOS 用户请使用 [双界面源码预览版安装说明](README.macos.md)。
 
 ## 使用场景
 

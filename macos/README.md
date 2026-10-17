@@ -4,11 +4,9 @@ macOS 源码运行版使用 Cocoa 原生窗口和本机 Python 服务，支持 Q
 
 ## 安装与启动
 
-需要 macOS 12 或以上、Git 和 uv。当前已在 Apple Silicon、Python 3.13 环境验证；Intel Mac 尚未实机验证。
+需要 macOS 13 或以上、uv 和 Xcode Command Line Tools。此分支增加 Intel Mac 的双界面和共用后台；当前实机记录见 [ACCEPTANCE.md](ACCEPTANCE.md)。完整安装教程在项目根目录的 macOS README 中。在本预览分支的源码目录执行：
 
 ```sh
-git clone https://github.com/fumingyang2004/Tulpa.git
-cd Tulpa
 ./setup-macos.sh
 ./start-macos.sh
 ```
@@ -21,7 +19,7 @@ cd Tulpa
 .venv/bin/python macos/build_app.py "$HOME/Applications/Tulpa.app"
 ```
 
-目标目录须不存在。这个 `.app` 引用当前项目的源码和 `.venv`，请保留项目目录；它不是独立的可移植安装包，也未进行 Apple 公证。更新源码后正常退出并重开应用。圆角透明图标由 `macos/assets/Tulpa.icns` 提供。
+可更新本目录创建的启动器，已有其他目录的同名应用不会覆盖。这个 `.app` 引用当前项目的源码和 `.venv`，请保留项目目录；它不是独立的可移植安装包，也未进行 Apple 公证。更新源码后正常退出并重开应用。圆角透明图标由 `macos/assets/Tulpa.icns` 提供。
 
 ## QQ / 微信本机读取
 
@@ -44,11 +42,11 @@ macOS 若显示 Python 访问“文稿”或“其他 App 数据”的系统提�
 
 在“外部 Agent / MCP”中选择平台、会话、时间与所需权限，创建连接并使用界面的客户端配置。可在资料首次导入前明确授权全部会话的只读连接；首次导入后固定来源账号，之后账号变化仍须重新授权。发送及群管理权限由用户另外开启。
 
-保持 Tulpa 运行，在已加载连接的 Codex 新聊天中说“用 Tulpa MCP 查询我的聊天……”即可。关闭 Tulpa 会停止本机服务，当前没有菜单栏后台模式或开机启动。外部模型、语音/OCR/Office 可选组件及 OneBot 需要另外配置。
+保持 Tulpa 运行，在已加载连接的 Codex 新聊天中说“用 Tulpa MCP 查询我的聊天……”即可。关闭桌面窗口保留后台；可用 `./tulpa stop` 停止，或通过 `./tulpa service install --start` 安装 launchd 登录启动服务。外部模型、语音/OCR/Office 可选组件及 OneBot 需要另外配置。
 
 ## 验证
 
-合成加密数据库覆盖 Mac QQ 大文件、溢出页、WAL、只读约束、源变化及损坏页拒绝；微信测试覆盖账号隔离、缓存验证、增量游标和关闭图片处理。原生桌面、真实本机 QQ/微信导入、文字增量监听及 Codex MCP 查询在 0.5.2 基础上验证；当前源码已适配 0.5.5，并在该版本重新运行隔离检查。未验证 Intel Mac 和独立可分发安装包。
+合成加密数据库检查覆盖 Mac QQ 大文件、溢出页、WAL、只读约束、源变化及损坏页拒绝；微信检查覆盖账号隔离、缓存验证、增量游标和关闭图片处理。本分支在上游 macOS 工作的基础上整合 Linux 功能；本次 Intel 实机结果以 [ACCEPTANCE.md](ACCEPTANCE.md) 为准。独立可分发安装包尚未验证。
 
 ```sh
 .venv/bin/python macos/check_readers.py
@@ -56,6 +54,8 @@ macOS 若显示 Python 访问“文稿”或“其他 App 数据”的系统提�
 .venv/bin/python scripts/check_wechat_no_images.py
 .venv/bin/python scripts/check_wechat_read_preferences.py
 .venv/bin/python macos/check_pending_mcp.py
+.venv/bin/python macos/check_processes.py
+.venv/bin/python scripts/check_macos_backend.py
 node macos/check_ui.cjs
 ```
 

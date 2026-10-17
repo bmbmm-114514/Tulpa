@@ -36,6 +36,7 @@ def configure_qq_worker():
         if apsw.connections():
             raise ValueError('qq_live_runtime_mismatch')
         _qq_worker = True
+        return
     if sys.platform.startswith('linux'):
         # Linux NTQQ uses the normal SQLite pending byte. Do not load or apply
         # the Windows-only wrapped lock-page exception on this platform.

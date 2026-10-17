@@ -36,12 +36,15 @@ def selected(root=ROOT):
         return True
     if source == 'database' or cfg['data_root'] or os.environ.get('CHATLOG_QQ_DATA_ROOT'):
         return False
-    if (Path(root)/'data/qq-source-root.json').exists() or not sys.platform.startswith('linux'):
+    if (Path(root)/'data/qq-source-root.json').exists() or not (sys.platform.startswith('linux') or sys.platform == 'darwin'):
         return False
     if state(root).get('backend') != 'docker':
         return False
     home = Path.home()
     roots = [home/'.config/QQ']
+    if sys.platform == 'darwin':
+        roots = [home/'Library/Containers/com.tencent.qq/Data/Library/Application Support/QQ',
+                 home/'Library/Group Containers/FN2V63AD2J.com.tencent/Library/Application Support/QQ']
     for app in ('com.qq.QQ', 'com.qq.QQlinux'):
         roots += [home/'.var/app'/app/'config/QQ', home/'.var/app'/app/'.config/QQ']
     for folder in roots:

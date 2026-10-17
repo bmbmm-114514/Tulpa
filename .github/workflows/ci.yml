@@ -1,4 +1,4 @@
-name: Windows and Linux validation
+name: Windows, Linux and frontend validation
 on:
   push:
     branches: [main]
@@ -36,6 +36,33 @@ jobs:
           .venv/bin/python scripts/check_publication.py
           .venv/bin/python scripts/check_linux_suite.py
           .venv/bin/python scripts/check_linux_components.py
+      - name: macOS backend and reader compatibility fixtures
+        run: |
+          .venv/bin/python scripts/check_macos_backend.py
+          .venv/bin/python scripts/check_macos_ui_bridge.py
+          .venv/bin/python scripts/check_wechat_no_images.py
+          .venv/bin/python scripts/check_wechat_read_preferences.py
+          .venv/bin/python macos/check_pending_mcp.py
+  frontend:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm test
+      - name: Install Chromium on Linux
+        if: runner.os == 'Linux'
+        run: npx playwright-core install --with-deps chromium
+      - name: Chromium / Edge interaction checks with synthetic APIs
+        run: npm run test:browser
   isolated-checks:
     runs-on: windows-latest
     timeout-minutes: 25
