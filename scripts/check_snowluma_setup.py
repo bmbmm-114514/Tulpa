@@ -98,7 +98,9 @@ def main():
             assert apply(dict(body,http_id='not-a-node'))['code']=='selection_required'
             assert apply(dict(body,account='67890'))['code']=='selection_required'
             assert apply(dict(body,token='untrusted'))['code']=='selection_required'
-            HTTP.error=401;assert apply(body)['code']=='http_auth_error';HTTP.error=404
+            HTTP.error=401;result=apply(body)
+            assert result['code']=='http_auth_error', result['code']
+            HTTP.error=404
             assert apply(body)['code']=='http_path_error';HTTP.error=0
             HTTP.account='67890';assert apply(body)['code']=='account_mismatch';HTTP.account='12345'
             with socket.socket() as unused:
