@@ -10,6 +10,7 @@ import tempfile
 import threading
 import time
 from unittest.mock import patch
+from test_environment import system_environment
 
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from check_mcp_reactions import ReactionBot, Events, eventually, ROOT
@@ -165,7 +166,7 @@ def main():
     bot=ThreadingHTTPServer(('127.0.0.1',0),ReactionBot)
     threading.Thread(target=bot.serve_forever,daemon=True).start()
     try:
-        with tempfile.TemporaryDirectory(prefix='tulpa-bridge-') as tmp,patch.dict('os.environ',{},clear=True):
+        with tempfile.TemporaryDirectory(prefix='tulpa-bridge-') as tmp,patch.dict('os.environ',system_environment(),clear=True):
             root=Path(tmp);store=Store(root/'chats.sqlite3')
             (root/'.env').write_text(f'REPLY_ONEBOT_URL=http://127.0.0.1:{bot.server_port}\nREPLY_ONEBOT_WS_URL=ws://127.0.0.1:{events.port}\nREPLY_ONEBOT_WS_TOKEN=event-fixture\n')
             with patch('chatlocal.onebot.ROOT',root),patch('chatlocal.message_sender.ROOT',root):
