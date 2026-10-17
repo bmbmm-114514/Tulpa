@@ -1,5 +1,6 @@
 """Tie native decoder/ASR lifetime to its parent even on force-close (Windows)."""
 import ctypes
+import os
 from ctypes import wintypes
 import os
 

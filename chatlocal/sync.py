@@ -48,6 +48,7 @@ def status(store):
 
 def sync_messages(store, platforms=None, *, load_stickers=False, progress=None, runner=None, cancelled=None):
     from .import_scope import get_scope
+    from .read_preferences import wechat_images_enabled
     scope=get_scope(store)
     platforms=[p for p,v in scope.items() if v['enabled']] if platforms is None else platforms
     if not isinstance(platforms,list) or not platforms or any(p not in ('qq','wechat') for p in platforms):raise ValueError('无效平台')
@@ -84,6 +85,8 @@ def sync_messages(store, platforms=None, *, load_stickers=False, progress=None, 
                     command=[sys.executable,str(ROOT/'scripts'/f'export_{platform}.py'),'--refresh',
                         '--incremental-request',str(request),'--output',str(output),'--account',account]
                     if not load_stickers:command.append('--no-stickers')
+                    read_images=platform!='wechat' or wechat_images_enabled(store)
+                    if not read_images:command.append('--no-images')
                     batch_result={}
                     if runner is None:
                         from .import_pipeline import run_batches
@@ -92,9 +95,9 @@ def sync_messages(store, platforms=None, *, load_stickers=False, progress=None, 
                             timing['attempts']=attempt+1
                             try:
                                 batch_result=run_batches(store,platform,
-                                    ['--incremental-request',str(request),'--account',account]+([] if load_stickers else ['--no-stickers']),output,
+                                    ['--incremental-request',str(request),'--account',account]+([] if load_stickers else ['--no-stickers'])+([] if read_images else ['--no-images']),output,
                                     progress=progress,cancelled=cancelled,automatic=True,
-                                    key=dict(checkpoint=checkpoint,account=account,conversations=scope[platform]['conversations'],load_stickers=load_stickers),
+                                    key=dict(checkpoint=checkpoint,account=account,conversations=scope[platform]['conversations'],load_stickers=load_stickers,read_images=read_images),
                                     env={'CHATLOCAL_SYNC_METRICS':str(folder/'metrics.json')})
                                 break
                             except ValueError as exc:
